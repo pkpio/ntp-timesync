@@ -8,8 +8,6 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Random;
 
-
-
 public class TimeClient {
 	private static String hostUrl = "127.0.0.1";
 	private static int PORT = 27780;
@@ -20,37 +18,49 @@ public class TimeClient {
 	public TimeClient() {
 
 		try {
-			
+
 			minNTPrequest = new NTPRequest();
-			
-			System.out.println("======================");
-			System.out.println("o\td");
-			System.out.println("======================");
+
+			System.out.println("=================================");
+			System.out.println("o\t\t\td");
+			System.out.println("=================================");
 
 			for (int i = 0; i < 10; i++) {
-				minNTPrequest.setT1(System.currentTimeMillis());
+
 				socket = new Socket(InetAddress.getByName(hostUrl), PORT);
-				
-				
-				
+				sendNTPRequest(minNTPrequest);
+
 				socket.close();
-				this.threadSleep(3000);
-				minNTPrequest.calculateOandD();
+				this.threadSleep(300);
 				
+				minNTPrequest.calculateOandD();
+
 			}
 
-			
 			socket.close();
 
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
-		} 
+		}
 	}
 
 	private void sendNTPRequest(NTPRequest request) {
-		//
+		/**
+		 * set T1
+		 */
+		request.setT1(System.currentTimeMillis());
+		
+		// send request object
+		
+		//receive response
+		
+		/**
+		 * set t4
+		 */
+		request.setT4(System.currentTimeMillis());
+		
 
 	}
 
