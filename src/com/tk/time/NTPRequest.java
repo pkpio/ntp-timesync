@@ -49,7 +49,11 @@ public class NTPRequest implements Serializable{
 		// 
 		// d=t+t'
 		d=t2-t1+t4-t3;
-		
+		System.out.println(
+				"T1 "+t1+
+				"T2 "+t2+
+				"T3 "+t3+
+				"T4 "+t4);
 		// o=oi+1/2(t'-t)
 		o=0.5*d+0.5*(t4-t3-(t2-t1));
 		System.out.println(o+"\t"+d);
