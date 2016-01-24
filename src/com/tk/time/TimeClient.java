@@ -20,14 +20,14 @@ public class TimeClient {
 
 			minNTPrequest = new NTPRequest();
 
-			System.out.println("=================================");
-			System.out.println("o\t\t\td");
-			System.out.println("=================================");
+			System.out.println("=================");
+			System.out.println("  o\t  d");
+			System.out.println("=================");
 
 			for (int i = 0; i < 10; i++) {
 
 				socket = new Socket(InetAddress.getByName(hostUrl), PORT);
-				sendNTPRequest(minNTPrequest);
+				sendNTPRequest();
 				this.threadSleep(300);
 
 				minNTPrequest.calculateOandD();
@@ -41,11 +41,11 @@ public class TimeClient {
 		}
 	}
 
-	private void sendNTPRequest(NTPRequest request) {
+	private void sendNTPRequest() {
 		/**
 		 * set T1
 		 */
-		request.setT1(System.currentTimeMillis());
+		minNTPrequest.setT1(System.currentTimeMillis());
 
 		/**
 		 * send request object
@@ -54,15 +54,14 @@ public class TimeClient {
 		try {
 
 			ObjectOutputStream oOs = new ObjectOutputStream(socket.getOutputStream());
-			oOs.flush();
-			oOs.writeObject(request);
+			oOs.writeObject(minNTPrequest);
 
 			/**
 			 * wait for server's response
 			 */
 			ObjectInputStream oIs = new ObjectInputStream(socket.getInputStream());
-			Object obj = oIs.readObject();
-			request = (NTPRequest) obj;
+			minNTPrequest= (NTPRequest) oIs.readObject();
+			//System.out.println("T2 "+minNTPrequest.getT2());
 			oOs.close();
 			oIs.close();
 
@@ -71,9 +70,9 @@ public class TimeClient {
 		}
 
 		/**
-		 * set t4
+		 * set t4 add offset 1200 ms
 		 */
-		request.setT4((long)(System.currentTimeMillis()+minD));
+		minNTPrequest.setT4((long)(System.currentTimeMillis()+minD));
 
 	}
 

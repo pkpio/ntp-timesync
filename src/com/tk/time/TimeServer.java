@@ -18,6 +18,7 @@ public class TimeServer {
 		try {
 			serverSocket = new ServerSocket(PORT);
 			System.out.println("Server started on port: " + PORT);
+			System.out.println("waiting for connection");
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -36,14 +37,13 @@ public class TimeServer {
 				/**
 				 * wait for connection
 				 */
-				System.out.println("waiting for connection");
+
 				Socket clientSocket = serverSocket.accept();
-				
-					NTPRequestHandler client = new NTPRequestHandler(clientSocket);
-					Thread clientThread = new Thread(client);
-					clientThread.start();
-			
-				
+
+				NTPRequestHandler client = new NTPRequestHandler(clientSocket);
+				Thread clientThread = new Thread(client);
+				clientThread.start();
+
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -87,9 +87,8 @@ public class TimeServer {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
-			
-			
+
+			// System.out.println("T1 "+request.getT1());
 			/**
 			 * set T2 value
 			 */
@@ -116,16 +115,16 @@ public class TimeServer {
 			 * write into socket
 			 */
 			try {
-		    	ObjectOutputStream oOs=new ObjectOutputStream(client.getOutputStream());
-		    	oOs.flush();
+				ObjectOutputStream oOs = new ObjectOutputStream(client.getOutputStream());
+				oOs.flush();
 				oOs.writeObject(request);
 				/**
-
+				 * 
 				 * close socket to client after a sleep
 				 */
-			    threadSleep(300);
-			    oOs.close();
-				
+				threadSleep(300);
+				oOs.close();
+
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -133,8 +132,6 @@ public class TimeServer {
 
 			// TODO
 
-			
-		    
 			try {
 				client.close();
 			} catch (Exception e) {
