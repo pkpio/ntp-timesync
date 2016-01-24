@@ -1,6 +1,7 @@
 package com.tk.time;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
@@ -33,13 +34,20 @@ public class TimeServer {
 		while (true) {
 			try {
 				/**
-				 *  wait for connection
+				 * wait for connection
 				 */
 				System.out.println("waiting for connection");
 				Socket clientSocket = serverSocket.accept();
-				NTPRequestHandler client = new NTPRequestHandler(clientSocket);
-				Thread clientThread = new Thread(client);
-				clientThread.start();
+				InputStream is = clientSocket.getInputStream();
+				ObjectInputStream oIs = new ObjectInputStream(is);
+				request = (NTPRequest) oIs.readObject();
+				if (request != null) {
+					NTPRequestHandler client = new NTPRequestHandler(clientSocket);
+					Thread clientThread = new Thread(client);
+					clientThread.start();
+				}
+				is.close();
+				oIs.close();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -70,9 +78,9 @@ public class TimeServer {
 
 		@Override
 		public void run() {
-			
+
 			/**
-			 *  set T2 value
+			 * set T2 value
 			 */
 			request.setT2(System.currentTimeMillis());
 			/**
@@ -94,11 +102,11 @@ public class TimeServer {
 
 		private void sendNTPAnswer(NTPRequest request) {
 			/**
-			 *  write into socket
+			 * write into socket
 			 */
-			//TODO
+			// TODO
 			/**
-			 *  close socket to client
+			 * close socket to client
 			 */
 			try {
 				client.close();
