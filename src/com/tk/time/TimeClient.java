@@ -28,6 +28,9 @@ public class TimeClient {
 
 				socket = new Socket(InetAddress.getByName(hostUrl), PORT);
 				sendNTPRequest();
+				/**
+				 *  add 300ms of gap between 2 measurements
+				 */
 				this.threadSleep(300);
 
 				minNTPrequest.calculateOandD();
