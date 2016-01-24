@@ -1,4 +1,5 @@
 package com.tk.time;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -10,6 +11,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class TimeServer {
 	private static int PORT = 27780;
 	private ServerSocket serverSocket;
+	NTPRequest request;
 
 	public TimeServer() {
 		try {
@@ -24,27 +26,26 @@ public class TimeServer {
 				e1.printStackTrace();
 			}
 		}
-		
 
 	}
-	
-	void startServer(){
+
+	void startServer() {
 		while (true) {
-	        try {
-	            //wait for connection
-	        	System.out.println("waiting for connection");
-	            Socket clientSocket = serverSocket.accept();
-	            NTPRequestHandler client = new NTPRequestHandler(clientSocket);
-	            Thread clientThread = new Thread(client);
-	            clientThread.start();
-	        } catch(Exception e){
-	        	//e.printStackTrace();
-	        }
+			try {
+				/**
+				 *  wait for connection
+				 */
+				System.out.println("waiting for connection");
+				Socket clientSocket = serverSocket.accept();
+				NTPRequestHandler client = new NTPRequestHandler(clientSocket);
+				Thread clientThread = new Thread(client);
+				clientThread.start();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
-		
-	}
-		
 
+	}
 
 	public static void main(String[] args) {
 		new TimeServer().startServer();
@@ -57,30 +58,47 @@ public class TimeServer {
 			this.client = client;
 
 		}
-		 void threadSleep(long millis) {
-				try {
-					Thread.sleep(millis);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+
+		void threadSleep(long millis) {
+
+			try {
+				Thread.sleep(millis);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
+		}
+
 		@Override
 		public void run() {
-			// aad random delay between 10 to 100 ms
-			this.threadSleep(ThreadLocalRandom.current().nextLong(10,100+1));
-			
-			// Read current system time
-			Long currentTime=System.currentTimeMillis();
-			System.out.println("time is "+currentTime);
-			// send current system time to client
-			
+			/**
+			 *  set T2 value
+			 */
+			request.setT2(System.currentTimeMillis());
+			/**
+			 * aad random delay between 10 to 100 ms
+			 */
+			this.threadSleep(ThreadLocalRandom.current().nextLong(10, 100 + 1));
+
+			/**
+			 * set T3 value
+			 */
+			request.setT3(System.currentTimeMillis());
+
+			/**
+			 * send current system time to client
+			 */
+			sendNTPAnswer(request);
 
 		}
 
 		private void sendNTPAnswer(NTPRequest request) {
-			// write into socket
-			
-			//close socket to client
+			/**
+			 *  write into socket
+			 */
+			//TODO
+			/**
+			 *  close socket to client
+			 */
 			try {
 				client.close();
 			} catch (IOException e) {

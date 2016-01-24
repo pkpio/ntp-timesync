@@ -1,4 +1,5 @@
 package com.tk.time;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -7,8 +8,10 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Random;
 
+
+
 public class TimeClient {
-	private static String hostUrl = "localhost";
+	private static String hostUrl = "127.0.0.1";
 	private static int PORT = 27780;
 	private Double minD;
 	private NTPRequest minNTPrequest;
@@ -17,11 +20,22 @@ public class TimeClient {
 	public TimeClient() {
 
 		try {
+			
+			minNTPrequest = new NTPRequest();
+			
+			System.out.println("======================");
+			System.out.println("o\td");
+			System.out.println("======================");
 
 			for (int i = 0; i < 10; i++) {
-				socket = new Socket(InetAddress.getLocalHost(), PORT);
-				this.threadSleep(300);
+				minNTPrequest.setT1(System.currentTimeMillis());
+				socket = new Socket(InetAddress.getByName(hostUrl), PORT);
+				
+				
+				
 				socket.close();
+				this.threadSleep(3000);
+				minNTPrequest.calculateOandD();
 				
 			}
 
