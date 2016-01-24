@@ -38,16 +38,12 @@ public class TimeServer {
 				 */
 				System.out.println("waiting for connection");
 				Socket clientSocket = serverSocket.accept();
-				InputStream is = clientSocket.getInputStream();
-				ObjectInputStream oIs = new ObjectInputStream(is);
-				request = (NTPRequest) oIs.readObject();
-				if (request != null) {
+				
 					NTPRequestHandler client = new NTPRequestHandler(clientSocket);
 					Thread clientThread = new Thread(client);
 					clientThread.start();
-				}
-				is.close();
-				oIs.close();
+			
+				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -79,12 +75,27 @@ public class TimeServer {
 		@Override
 		public void run() {
 
+			InputStream is;
+			try {
+				is = client.getInputStream();
+				ObjectInputStream oIs = new ObjectInputStream(is);
+				request = (NTPRequest) oIs.readObject();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			
+			
 			/**
 			 * set T2 value
 			 */
 			request.setT2(System.currentTimeMillis());
 			/**
-			 * aad random delay between 10 to 100 ms
+			 * add random delay between 10 to 100 ms
 			 */
 			this.threadSleep(ThreadLocalRandom.current().nextLong(10, 100 + 1));
 
@@ -104,21 +115,28 @@ public class TimeServer {
 			/**
 			 * write into socket
 			 */
-			
-		    try {
+			try {
 		    	ObjectOutputStream oOs=new ObjectOutputStream(client.getOutputStream());
+		    	oOs.flush();
 				oOs.writeObject(request);
-				oOs.close();
+				/**
+
+				 * close socket to client after a sleep
+				 */
+			    threadSleep(300);
+			    oOs.close();
+				
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			/**
-			 * close socket to client after a sleep
-			 */
-		    threadSleep(300);
+
+			// TODO
+
+			
+		    
 			try {
-				//client.close();
+				client.close();
 			} catch (Exception e) {
 				System.out.println("failed to close socket");
 				e.printStackTrace();

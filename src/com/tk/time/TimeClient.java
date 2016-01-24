@@ -3,16 +3,14 @@ package com.tk.time;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Random;
 
 public class TimeClient {
 	private static String hostUrl = "127.0.0.1";
 	private static int PORT = 27780;
-	private Double minD;
+	private Double minD=new Double(1200);
 	private NTPRequest minNTPrequest;
 	private Socket socket;
 
@@ -36,8 +34,6 @@ public class TimeClient {
 
 			}
 
-			
-
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -51,13 +47,16 @@ public class TimeClient {
 		 */
 		request.setT1(System.currentTimeMillis());
 
-		// send request object
+		/**
+		 * send request object
+		 */
 
 		try {
 
 			ObjectOutputStream oOs = new ObjectOutputStream(socket.getOutputStream());
+			oOs.flush();
 			oOs.writeObject(request);
-			
+
 			/**
 			 * wait for server's response
 			 */
@@ -65,17 +64,16 @@ public class TimeClient {
 			Object obj = oIs.readObject();
 			request = (NTPRequest) obj;
 			oOs.close();
+			oIs.close();
+
 		} catch (IOException | ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		// receive response
 
 		/**
 		 * set t4
 		 */
-		request.setT4(System.currentTimeMillis());
+		request.setT4((long)(System.currentTimeMillis()+minD));
 
 	}
 
