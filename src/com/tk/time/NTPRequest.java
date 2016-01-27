@@ -9,12 +9,12 @@ public class NTPRequest implements Serializable{
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	public long t1; //time at client
-	public long t2; //time at server when client request was received
-	public long t3; //time at server after adding random delay
-	public long t4; //time at client when server response was received
-	public double o;
-	public double d;
+	private long t1; //time at client
+	private long t2; //time at server when client request was received
+	private long t3; //time at server after adding random delay
+	private long t4; //time at client when server response was received
+	private double o;
+	private double d;
 
 	public NTPRequest() {
 	
@@ -44,20 +44,59 @@ public class NTPRequest implements Serializable{
 	public void setT4(long t4) {
 		this.t4 = t4;
 	}
-	
-	public void calculateOandD() {
-		// 
-		// d=t+t'
-		d=t2-t1+t4-t3;
-//		System.out.println(
-//				"T1 "+t1+
-//				"T2 "+t2+
-//				"T3 "+t3+
-//				"T4 "+t4);
-		// o=oi+1/2(t'-t)
-		o=0.5*d+0.5*(t4-t3-(t2-t1));
-		System.out.println(o+"\t"+d);
-		
+	public double getD() {
+		return d;
+	}
+	public double getO() {
+		return o;
 	}
 	
+	
+	/**
+	 * Calculates D and O values
+	 */
+	public void calculateOandD() {
+		/**
+		 * Delay evaluation formula :
+		 * 		d = t + t’ = T(i-2) - T(i-3) + T (i) - T(i-1)
+		 *  
+		 *  Our mapping is:
+		 *  T(i-3) -> T1
+		 *  T(i-2) -> T2
+		 *  T(i-1) -> T3
+		 *  T(i)   -> T4
+		 *  
+		 * Revised formula for our notation :
+		 *  	d = T2 - T1 + T4 - T3
+		 */
+		d = (t2 - t1) + (t4 - t3);
+		
+		/**
+		 * Offset formula :
+		 * 		o = 1/2 * (T(i-2) - T(i-3) + T(i-1) - T(i))
+		 * 
+		 * Revised formula for our notation :
+		 * 		o = 1/2 * (T2 - T1 + T3 - T4)
+		 */
+		o = 0.5 * (t2 - t1 + t3 - t4);
+		
+		// Print these values
+		System.out.println(o+"\t"+d);
+	}
+
+	/**
+	 * Calculates the min accuracy of this measurement
+	 * @return min accuracy
+	 */
+	public double getAccuracyMin(){
+		return o - (d / 2);
+	}
+	
+	/**
+	 * Calculates the max accuracy of this measurement
+	 * @return max accuracy
+	 */
+	public double getAccuracyMax(){
+		return o + (d / 2);
+	}
 }

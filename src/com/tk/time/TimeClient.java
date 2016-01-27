@@ -8,35 +8,45 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 public class TimeClient {
-	private static String hostUrl = "127.0.0.1";
-	private static int PORT = 27780;
-	private Double minD=new Double(1200);
-	private NTPRequest minNTPrequest;
-	private Socket socket;
+	private Socket clientSocket;
+	private NTPRequest mNtpRequest;
+	private NTPRequest minDelayNtpRequest;	// NTP request that had min value for delay
+	
 
+	/**
+	 * Start the client and calculate NTP values
+	 */
 	public TimeClient() {
-
 		try {
-
-			minNTPrequest = new NTPRequest();
+			mNtpRequest = new NTPRequest();
 
 			System.out.println("=================");
 			System.out.println("  o\t  d");
 			System.out.println("=================");
 
+			// A total of 10 measurements
 			for (int i = 0; i < 10; i++) {
-
-				socket = new Socket(InetAddress.getByName(hostUrl), PORT);
+				
+				// Open a socket to server
+				clientSocket = new Socket(InetAddress.getByName(Util.HOST_ADDR), Util.HOST_PORT);
+				
+				// Send NTP request
 				sendNTPRequest();
-				/**
-				 *  add 300ms of gap between 2 measurements
-				 */
-				this.threadSleep(300);
-
-				minNTPrequest.calculateOandD();
-
+				
+				// Do measurements
+				mNtpRequest.calculateOandD();
+				
+				// Check if this is the minimum delay NTP Request so far
+				if(minDelayNtpRequest == null || mNtpRequest.getD() < minDelayNtpRequest.getD())
+					minDelayNtpRequest = mNtpRequest;
+				
+				// wait 300ms before next iteration
+				Util.sleepThread(300);
 			}
-
+			
+			// Calculate based on min value of d
+			doFinalDelayCalculation();
+			
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -45,50 +55,48 @@ public class TimeClient {
 	}
 
 	private void sendNTPRequest() {
-		/**
-		 * set T1
-		 */
-		minNTPrequest.setT1(System.currentTimeMillis());
+		// set T1
+		mNtpRequest.setT1(System.currentTimeMillis());
 
-		/**
-		 * send request object
-		 */
-
+		// send request object
 		try {
 
-			ObjectOutputStream oOs = new ObjectOutputStream(socket.getOutputStream());
-			oOs.writeObject(minNTPrequest);
+			ObjectOutputStream oOs = new ObjectOutputStream(clientSocket.getOutputStream());
+			oOs.writeObject(mNtpRequest);
 
-			/**
-			 * wait for server's response
-			 */
-			ObjectInputStream oIs = new ObjectInputStream(socket.getInputStream());
-			minNTPrequest= (NTPRequest) oIs.readObject();
-			//System.out.println("T2 "+minNTPrequest.getT2());
+			// wait for server's response
+			ObjectInputStream oIs = new ObjectInputStream(clientSocket.getInputStream());
+			mNtpRequest= (NTPRequest) oIs.readObject();
+			
+			// Close streams
 			oOs.close();
 			oIs.close();
-
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
+		
 
-		/**
-		 * set t4 add offset 1200 ms
-		 */
-		minNTPrequest.setT4((long)(System.currentTimeMillis()+minD));
+		// Emulate network delay - sleep before recording time stamps
+		Util.sleepThread(Util.MIN_NET_DELAY + Util.getRandomDelay());
 
-	}
-
-	private void threadSleep(long millis) {
-		try {
-			Thread.sleep(millis);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		// set t4
+		mNtpRequest.setT4((long)(System.currentTimeMillis()));
 	}
 
 	public static void main(String[] args) {
 		new TimeClient();
+	}
+	
+	/**
+	 * Selects a NTPRequest based on min value of delay for each request
+	 */
+	private void doFinalDelayCalculation(){
+		System.out.println("=================");
+		System.out.println("Selected time difference : " + minDelayNtpRequest.getD());
+		System.out.println("Corresponding accuracy   : " 
+					+ minDelayNtpRequest.getAccuracyMin() 
+					+ " to "
+					+ minDelayNtpRequest.getAccuracyMax() );		
 	}
 
 }

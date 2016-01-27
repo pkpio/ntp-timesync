@@ -6,19 +6,34 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class TimeServer {
-	private static int PORT = 27780;
 	private ServerSocket serverSocket;
-	NTPRequest request;
+	NTPRequest mNtpRequest;
 
+	/**
+	 * Start Time server and listen for connections
+	 */
 	public TimeServer() {
 		try {
-			serverSocket = new ServerSocket(PORT);
-			System.out.println("Server started on port: " + PORT);
+			serverSocket = new ServerSocket(Util.HOST_PORT);
+			System.out.println("Server started on port: " + Util.HOST_PORT);
 			System.out.println("waiting for connection");
 
+			// Always keep trying for new client connections
+			while (true) {
+				try {
+					Socket incomingSocket = serverSocket.accept();
+
+					// Handle the incoming NTP request on a new thread
+					NTPRequestHandler ntpReqHandler = new NTPRequestHandler(incomingSocket);
+					new Thread(ntpReqHandler).start();
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 			try {
@@ -30,109 +45,66 @@ public class TimeServer {
 
 	}
 
-	void startServer() {
-		while (true) {
-			try {
-				/**
-				 * wait for connection
-				 */
-
-				Socket clientSocket = serverSocket.accept();
-
-				NTPRequestHandler client = new NTPRequestHandler(clientSocket);
-				Thread clientThread = new Thread(client);
-				clientThread.start();
-
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-
-	}
-
 	public static void main(String[] args) {
-		new TimeServer().startServer();
+		new TimeServer();
 	}
+	
 
+	/**
+	 * NTPRequest Handler for the server side
+	 */
 	private class NTPRequestHandler implements Runnable {
-		private Socket client;
+		private Socket mCientSocket;
 
-		public NTPRequestHandler(Socket client) {
-			this.client = client;
+		public NTPRequestHandler(Socket clientSocket) {
+			mCientSocket = clientSocket;
 
-		}
-
-		void threadSleep(long millis) {
-
-			try {
-				Thread.sleep(millis);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
 		}
 
 		@Override
 		public void run() {
-
 			InputStream is;
 			try {
-				is = client.getInputStream();
+				is = mCientSocket.getInputStream();
 				ObjectInputStream oIs = new ObjectInputStream(is);
-				request = (NTPRequest) oIs.readObject();
+				mNtpRequest = (NTPRequest) oIs.readObject();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			
+			// Emulate network delay - sleep before recording time stamps
+			Util.sleepThread(Util.MIN_NET_DELAY + Util.getRandomDelay());
 
-			// System.out.println("T1 "+request.getT1());
-			/**
-			 * set T2 value
-			 */
-			request.setT2(System.currentTimeMillis());
-			/**
-			 * add random delay between 10 to 100 ms
-			 */
-			this.threadSleep(ThreadLocalRandom.current().nextLong(10, 100 + 1));
+			// set T2 value
+			mNtpRequest.setT2(System.currentTimeMillis());
+			
+			// add random delay between 10 to 100 ms - simulating processing delay (not required)
+			Util.sleepThread(Util.getRandomDelay());
 
-			/**
-			 * set T3 value
-			 */
-			request.setT3(System.currentTimeMillis());
+			// set T3 value
+			mNtpRequest.setT3(System.currentTimeMillis());
 
-			/**
-			 * send current system time to client
-			 */
-			sendNTPAnswer(request);
+			// Respond to client
+			sendNTPAnswer(mNtpRequest);
 
 		}
 
 		private void sendNTPAnswer(NTPRequest request) {
-			/**
-			 * write into socket
-			 */
+			// write to client socket
 			try {
-				ObjectOutputStream oOs = new ObjectOutputStream(client.getOutputStream());
-				oOs.flush();
+				ObjectOutputStream oOs = new ObjectOutputStream(mCientSocket.getOutputStream());
+				oOs.flush(); // -TODO- Flush before write?
 				oOs.writeObject(request);
-				/**
-				 * 
-				 * close socket to client after a sleep
-				 */
-				threadSleep(300);
 				oOs.close();
-
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 
-			// TODO
-
+			// Close socket
 			try {
-				client.close();
+				mCientSocket.close();
 			} catch (Exception e) {
 				System.out.println("failed to close socket");
 				e.printStackTrace();
