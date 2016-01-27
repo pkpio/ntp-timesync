@@ -20,9 +20,9 @@ public class TimeClient {
 		try {
 			mNtpRequest = new NTPRequest();
 
-			System.out.println("=================");
-			System.out.println("  o\t  d");
-			System.out.println("=================");
+			System.out.println("=========================");
+			System.out.println("  o \t\t  d");
+			System.out.println("=========================");
 
 			// A total of 10 measurements
 			for (int i = 0; i < 10; i++) {
@@ -91,7 +91,7 @@ public class TimeClient {
 	 * Selects a NTPRequest based on min value of delay for each request
 	 */
 	private void doFinalDelayCalculation(){
-		System.out.println("=================");
+		System.out.println("------------------------");
 		System.out.println("Selected time difference : " + minDelayNtpRequest.getD());
 		System.out.println("Corresponding accuracy   : " 
 					+ minDelayNtpRequest.getAccuracyMin() 

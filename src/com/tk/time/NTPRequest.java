@@ -81,7 +81,7 @@ public class NTPRequest implements Serializable{
 		o = 0.5 * (t2 - t1 + t3 - t4);
 		
 		// Print these values
-		System.out.println(o+"\t"+d);
+		System.out.println(o + "\t\t" + d);
 	}
 
 	/**

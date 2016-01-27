@@ -1,0 +1,55 @@
+<project>
+
+	<description>
+		TK1 - Programmieraufgabe 4
+	</description>
+	
+	<property name="src" location="src" />
+	<property name="build" location="build" />
+	<property name="dist" location="dist" />
+	
+	<target name="clean">
+		<delete dir="${build}" />
+		<delete dir="${dist}" />
+	</target>
+	
+	<target name="init" depends="clean">
+		<tstamp />
+		<mkdir dir="${build}" />
+	</target>
+	
+	<target name="compile" depends="init">
+		<javac srcdir="${src}" destdir="${build}" />
+	</target>
+	
+	<target name="jar" depends="compile">
+		<jar destfile="${dist}/client.jar" basedir="${build}">
+			<manifest>
+				<attribute name="Main-Class" value="com.tk.time.TimeClient" />
+			</manifest>
+		</jar>
+		<jar destfile="${dist}/server.jar" basedir="${build}">
+			<manifest>
+				<attribute name="Main-Class" value="com.tk.time.TimeServer" />
+			</manifest>
+		</jar>
+	</target>
+	
+	<target name="run" depends="jar">
+		<parallel>
+			<java jar="${dist}/server.jar" fork="true" failonerror="true" />
+			
+			<!-- Clients waitfor server before starting -->
+			<sequential>
+				<waitfor maxwait="3" maxwaitunit="minute" checkevery="500">
+					<socket server="localhost" port="27780"/>
+				</waitfor>
+				<java jar="${dist}/client.jar" fork="true" failonerror="false" />
+			</sequential>
+		</parallel>
+	</target>
+	
+	<target name="default" depends="run">
+	</target>
+	
+</project>

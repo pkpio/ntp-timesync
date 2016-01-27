@@ -30,7 +30,7 @@ public class TimeServer {
 					new Thread(ntpReqHandler).start();
 					
 				} catch (Exception e) {
-					e.printStackTrace();
+					//e.printStackTrace();
 				}
 			}
 			
@@ -39,7 +39,7 @@ public class TimeServer {
 			try {
 				serverSocket.close();
 			} catch (IOException e1) {
-				e1.printStackTrace();
+				//e1.printStackTrace();
 			}
 		}
 
@@ -69,7 +69,7 @@ public class TimeServer {
 				ObjectInputStream oIs = new ObjectInputStream(is);
 				mNtpRequest = (NTPRequest) oIs.readObject();
 			} catch (IOException e) {
-				e.printStackTrace();
+				// e.printStackTrace();
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
 			}
@@ -99,7 +99,7 @@ public class TimeServer {
 				oOs.writeObject(request);
 				oOs.close();
 			} catch (IOException e1) {
-				e1.printStackTrace();
+				//e1.printStackTrace();
 			}
 
 			// Close socket
@@ -107,7 +107,7 @@ public class TimeServer {
 				mCientSocket.close();
 			} catch (Exception e) {
 				System.out.println("failed to close socket");
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 		}
 
