@@ -77,7 +77,7 @@ public class TimeClient {
 		
 
 		// Emulate network delay - sleep before recording time stamps
-		Util.sleepThread(Util.MIN_NET_DELAY + Util.getRandomDelay());
+		Util.sleepThread(Util.getRandomDelay());
 
 		// set t4
 		mNtpRequest.setT4((long)(System.currentTimeMillis()));
@@ -92,7 +92,8 @@ public class TimeClient {
 	 */
 	private void doFinalDelayCalculation(){
 		System.out.println("------------------------");
-		System.out.println("Selected time difference : " + minDelayNtpRequest.getD());
+		System.out.println("Selected time difference   : " + minDelayNtpRequest.getD());
+		System.out.println("Corresponding clock offset : " + minDelayNtpRequest.getO());
 		System.out.println("Corresponding accuracy   : " 
 					+ minDelayNtpRequest.getAccuracyMin() 
 					+ " to "

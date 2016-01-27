@@ -5,9 +5,9 @@ import java.util.concurrent.ThreadLocalRandom;
 public class Util {
 	
 	/**
-	 * Min network delay to be emulated when receiving a packet (on server or client)
+	 * Induced offset between server and client clocks (client is lagging)
 	 */
-	public static final long MIN_NET_DELAY = 1200;
+	public static final long SERVER_OFFSET = 1200;
 	
 	/**
 	 * Network IP address

@@ -39,11 +39,9 @@
 		<parallel>
 			<java jar="${dist}/server.jar" fork="true" failonerror="true" />
 			
-			<!-- Clients waitfor server before starting -->
+			<!-- Clients wait for 2 seconds before starting -->
 			<sequential>
-				<waitfor maxwait="3" maxwaitunit="minute" checkevery="500">
-					<socket server="localhost" port="27780"/>
-				</waitfor>
+				 <sleep seconds="2"/>
 				<java jar="${dist}/client.jar" fork="true" failonerror="false" />
 			</sequential>
 		</parallel>
